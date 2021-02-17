@@ -13,17 +13,5 @@ app.use(bodyParser.json());
 
 // Cors
 
-// Rutas
-app.get('/pruebas', (req, res) => {
-    res.status(200).send({
-        message: 'Mensaje de pruebas Red-social'
-    });
-});
-
-app.get('/', (req, res) => {
-    res.status(200).send({
-        message: 'Hola mundo desde NodeJS'
-    });
-});
 
 module.exports = app;
