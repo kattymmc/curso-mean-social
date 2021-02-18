@@ -11,7 +11,7 @@ mongoose.connect('mongodb://localhost:27017/curso-mean-social',
             console.log("Se conectó a curso-mean-social")
 
             app.listen(port, ()=>{
-                console.log(`Servidor corriendo en http://localhost:/${port}`);
+                console.log(`Servidor corriendo en http://localhost:${port}/`);
             });
             
         })
