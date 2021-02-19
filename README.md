@@ -8,3 +8,4 @@
 * npm install jwt-simple --save
 * npm install moment --save
 * npm install nodemon --save-dev
+* npm install mongoose-pagination --save
