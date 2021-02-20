@@ -1,6 +1,8 @@
 'use strict'
 var bcrypt = require('bcrypt-nodejs');
 var mongoosePaginate = require('mongoose-pagination');
+var fs = require('fs');
+var path = require('path');
 
 var jwt = require('../services/jwt');
 var User = require('../models/user');
@@ -156,6 +158,54 @@ function updateUser(req, res){
     });
 }
 
+function uploadImage(req, res){
+    var userId = req.params.id;
+
+    if(req.files){
+        var file_path = req.files.image.path; // Devuelve el path donde se guardo la imagen
+        console.log(file_path);
+
+        var file_split = file_path.split('\\'); // Devulve un array con las partes del path
+        console.log(file_split);
+
+        var file_name = file_split[2]; // Obtener el nombre del archivo
+        console.log(file_name);
+
+        var ext_split = file_name.split('\.'); // Separar el nombre del archivo y su extension
+        console.log(ext_split);
+
+        var file_ext = ext_split[1]; // Obtener la extension del archivo
+        console.log(file_ext);
+        
+        // Si el usuario no es el mismo del token, le niega el permiso
+        if(userId != req.user.sub){
+            return removeFilesOfUploads(res, file_path,'No tienes permiso para editar los datos del usuario');
+        }
+
+        if(file_ext == 'png' || file_ext == 'jpg' || file_ext == 'jpeg' || file_ext == 'gif'){
+            // Actualizar documento de usuario logueado
+            User.findByIdAndUpdate(userId, {image: file_name}, {new: true}, (err, userUpdated) => {
+                if(err) return res.status(500).send({message: 'Error en la peticion'});
+
+                if(!userUpdated) return res.status(404).send({message: 'Error en la peticion'});
+
+                return res.status(200).send({user: userUpdated});
+            })
+        }else{
+            return removeFilesOfUploads(res, file_path, 'Extension no válida');
+        }
+    } else {
+        return res.status(200).send({message: 'No se han subido imagenes'});
+    }
+}
+
+// BORRAR LA IMAGEN SUBIDA 
+function removeFilesOfUploads(res, file_path, message){
+    fs.unlink(file_path, (err) => {
+        return res.status(200).send({message: message});
+    });
+}
+
 module.exports = {
     home,
     pruebas,
@@ -163,5 +213,6 @@ module.exports = {
     loginUser,
     getUser,
     getUsers,
-    updateUser
+    updateUser,
+    uploadImage
 }
