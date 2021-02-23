@@ -67,8 +67,21 @@ function getPublications(req, res){
     });
 }
 
+function getPublication(req, res){
+    var publicationId = req.params.id;
+
+    Publication.findById(publicationId, (err, publication) => {
+        if(err) return res.status(500).send({message: 'Error en obtener publicacion'});
+        
+        if(!publication) return res.status(404).send({message: 'La publicacion no existe'});
+
+        return res.status(200).send({publication});
+    })
+}
+
 module.exports = {
     probando,
     savePublication,
-    getPublications
+    getPublications,
+    getPublication
 }
