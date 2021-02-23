@@ -91,10 +91,68 @@ function deletePublication(req, res){
     });
 }
 
+function uploadImage(req, res){
+    var publicationId = req.params.id;
+
+    if(req.files){
+        var file_path = req.files.image.path; // Devuelve el path donde se guardo la imagen
+        var file_split = file_path.split('\\'); // Devulve un array con las partes del path
+        var file_name = file_split[2]; // Obtener el nombre del archivo
+        var ext_split = file_name.split('\.'); // Separar el nombre del archivo y su extension
+        var file_ext = ext_split[1]; // Obtener la extension del archivo
+
+        if(file_ext == 'png' || file_ext == 'jpg' || file_ext == 'jpeg' || file_ext == 'gif'){
+            Publication.findOne({'user': req.user.sub,'_id': publicationId}).exec((err, publication) => {
+                console.log(publication);
+                if(publication){
+                    // Actualizar documento de usuario logueado
+                    Publication.findByIdAndUpdate(publicationId, {file: file_name}, {new: true}, (err, publicationUpdated) => {
+                        if(err) return res.status(500).send({message: 'Error en la peticion'});
+
+                        if(!publicationUpdated) return res.status(404).send({message: 'Error en la peticion'});
+
+                        return res.status(200).send({publication: publicationUpdated});
+                    });
+                }else{
+                    return removeFilesOfUploads(res, file_path, 'No tienes permiso para actualizar esta publicacion');
+                }
+            });
+            
+
+        }else{
+            return removeFilesOfUploads(res, file_path, 'Extension no válida');
+        }
+    } else {
+        return res.status(200).send({message: 'No se han subido imagenes'});
+    }
+}
+
+// BORRAR LA IMAGEN SUBIDA 
+function removeFilesOfUploads(res, file_path, message){
+    fs.unlink(file_path, (err) => {
+        return res.status(200).send({message: message});
+    });
+}
+
+function getImagenFile(req, res){
+    var image_file = req.params.imageFile;
+    var path_file = './uploads/publications/'+image_file;
+
+    fs.exists(path_file, (exists) => {
+        if(exists){
+            res.sendFile(path.resolve(path_file));
+        } else {
+            res.status(200).send({message: 'No existe la imagen...'})
+        }
+    });
+}
+
 module.exports = {
     probando,
     savePublication,
     getPublications,
     getPublication,
-    deletePublication
+    deletePublication,
+    uploadImage,
+    getImagenFile
 }
