@@ -7,6 +7,7 @@ var path = require('path');
 var jwt = require('../services/jwt');
 var User = require('../models/user');
 var Follow = require('../models/follow');
+var Publication = require('../models/publication');
 const { isBuffer } = require('util');
 
 
@@ -306,9 +307,16 @@ async function getCountFollow(user_id){
                     }).catch((err) => {
                         return handleerror(err);
                     });
+    var publications = await Publication.count({"user":user_id})
+                    .exec().then((count)=>{
+                        return count;
+                    }).catch((err) => {
+                        return handleerror(err);
+                    });
     return {
         following: following,
-        followed: followed
+        followed: followed,
+        publications: publications
     }
 }
 
