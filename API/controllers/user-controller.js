@@ -7,6 +7,7 @@ var path = require('path');
 var jwt = require('../services/jwt');
 var User = require('../models/user');
 var Follow = require('../models/follow');
+const { isBuffer } = require('util');
 
 
 // Rutas
@@ -194,13 +195,6 @@ async function followUserIds(user_id){
                     }).catch((e) =>{
                         return handleerror(err);
                     });
-
-
-    /*var followed_clean = [];
-    followed.forEach((follow) => {
-        followed_clean.push(follow.user);
-    });*/
-
     return{
         following: following,
         followed: followed
@@ -289,6 +283,35 @@ function getImagenFile(req, res){
     });
 }
 
+function getCounters(req, res){
+    var userId = req.user.sub;
+    if(req.params.id){
+        userId = req.params.id;
+    }
+    getCountFollow(userId).then((value) => {
+        return res.status(200).send(value);
+    })
+}
+
+async function getCountFollow(user_id){
+    var following = await Follow.count({"user":user_id})
+                    .exec().then((count)=>{
+                        return count;
+                    }).catch((err) => {
+                        return handleerror(err);
+                    });
+    var followed = await Follow.count({"followed":user_id})
+                    .exec().then((count)=>{
+                        return count;
+                    }).catch((err) => {
+                        return handleerror(err);
+                    });
+    return {
+        following: following,
+        followed: followed
+    }
+}
+
 module.exports = {
     home,
     pruebas,
@@ -298,5 +321,6 @@ module.exports = {
     getUsers,
     updateUser,
     uploadImage,
-    getImagenFile
+    getImagenFile,
+    getCounters
 }
