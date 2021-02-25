@@ -88,10 +88,23 @@ function getUnviewedMessages(req, res){
     });
 }
 
+function setViewedMessages(req, res){
+    var userId = req.user.sub;
+    // Update: en el segundo parametro van las propiedades que se va a actualizar
+    // en el tercer paremtro "multi" indica que se van a actualizar todos los documentos que coincidan con la busqueda
+    Message.update({receiver: userId, viewed:'false'}, {viewed:'true'}, {"multi":true}, (err, messagesUpdated) => {
+        if(err) return res.status(500).send({message: 'Error en la petición'});
+        return res.status(200).send({
+            messages: messagesUpdated
+        });
+    });
+}
+
 module.exports ={
     probando,
     saveMessage,
     getReceivedMessages,
     getEmmitMessages,
-    getUnviewedMessages
+    getUnviewedMessages,
+    setViewedMessages
 }
